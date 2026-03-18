@@ -61,7 +61,7 @@ final class IllegalConstructorStaticCallRule implements Rule
 			return false;
 		}
 
-		$parentClasses = array_map(static fn (string $name) => strtolower($name), $scope->getClassReflection()->getParentClassesNames());
+		$parentClasses = array_map(static fn (string $name): string => strtolower($name), $scope->getClassReflection()->getParentClassesNames());
 
 		return in_array(strtolower($scope->resolveName($node->class)), $parentClasses, true);
 	}
