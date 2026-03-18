@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\Methods;
 
@@ -12,23 +14,22 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 final class IllegalConstructorMethodCallRule implements Rule
 {
+    public function getNodeType(): string
+    {
+        return Node\Expr\MethodCall::class;
+    }
 
-	public function getNodeType(): string
-	{
-		return Node\Expr\MethodCall::class;
-	}
+    public function processNode(Node $node, Scope $scope): array
+    {
+        if (!$node->name instanceof Node\Identifier || $node->name->toLowerString() !== '__construct') {
+            return [];
+        }
 
-	public function processNode(Node $node, Scope $scope): array
-	{
-		if (!$node->name instanceof Node\Identifier || $node->name->toLowerString() !== '__construct') {
-			return [];
-		}
-
-		return [
-			RuleErrorBuilder::message('Call to __construct() on an existing object is not allowed.')
-				->identifier('constructor.call')
-				->build(),
-		];
-	}
+        return [
+            RuleErrorBuilder::message('Call to __construct() on an existing object is not allowed.')
+                ->identifier('constructor.call')
+                ->build(),
+        ];
+    }
 
 }

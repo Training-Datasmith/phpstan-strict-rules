@@ -1,8 +1,11 @@
-<?php // lint >= 8.1
+<?php
+
+declare(strict_types=1);
+// lint >= 8.1
 
 function (stdClass $std) {
-	$std->foo(...);
+    $std->foo(...);
 
-	$foo = 'bar';
-	$std->$foo(...);
+    $foo = 'bar';
+    $std->$foo(...);
 };

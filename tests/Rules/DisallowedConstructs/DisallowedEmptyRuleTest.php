@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\DisallowedConstructs;
 
@@ -10,20 +12,19 @@ use PHPStan\Testing\RuleTestCase;
  */
 class DisallowedEmptyRuleTest extends RuleTestCase
 {
+    protected function getRule(): Rule
+    {
+        return new DisallowedEmptyRule();
+    }
 
-	protected function getRule(): Rule
-	{
-		return new DisallowedEmptyRule();
-	}
-
-	public function testRule(): void
-	{
-		$this->analyse([__DIR__ . '/data/empty.php'], [
-			[
-				'Construct empty() is not allowed. Use more strict comparison.',
-				3,
-			],
-		]);
-	}
+    public function testRule(): void
+    {
+        $this->analyse([__DIR__ . '/data/empty.php'], [
+            [
+                'Construct empty() is not allowed. Use more strict comparison.',
+                3,
+            ],
+        ]);
+    }
 
 }

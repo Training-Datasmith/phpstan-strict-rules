@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\VariableVariables;
 
@@ -11,6 +13,7 @@ use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\VerbosityLevel;
 use SimpleXMLElement;
+
 use function sprintf;
 
 /**
@@ -18,81 +21,78 @@ use function sprintf;
  */
 class VariablePropertyFetchRule implements Rule
 {
+    private ReflectionProvider $reflectionProvider;
 
-	private ReflectionProvider $reflectionProvider;
+    /** @var string[] */
+    private array $universalObjectCratesClasses;
 
-	/** @var string[] */
-	private array $universalObjectCratesClasses;
+    /**
+     * @param string[] $universalObjectCratesClasses
+     */
+    public function __construct(ReflectionProvider $reflectionProvider, array $universalObjectCratesClasses)
+    {
+        $this->reflectionProvider = $reflectionProvider;
+        $this->universalObjectCratesClasses = $universalObjectCratesClasses;
+    }
 
-	/**
-	 * @param string[] $universalObjectCratesClasses
-	 */
-	public function __construct(ReflectionProvider $reflectionProvider, array $universalObjectCratesClasses)
-	{
-		$this->reflectionProvider = $reflectionProvider;
-		$this->universalObjectCratesClasses = $universalObjectCratesClasses;
-	}
+    public function getNodeType(): string
+    {
+        return PropertyFetch::class;
+    }
 
-	public function getNodeType(): string
-	{
-		return PropertyFetch::class;
-	}
+    public function processNode(Node $node, Scope $scope): array
+    {
+        if ($node->name instanceof Node\Identifier) {
+            return [];
+        }
 
-	public function processNode(Node $node, Scope $scope): array
-	{
-		if ($node->name instanceof Node\Identifier) {
-			return [];
-		}
+        if ($scope->getType($node->name)->isLiteralString()->yes()) {
+            return [];
+        }
 
-		if ($scope->getType($node->name)->isLiteralString()->yes()) {
-			return [];
-		}
+        $fetchedOnType = $scope->getType($node->var);
+        foreach ($fetchedOnType->getObjectClassNames() as $referencedClass) {
+            if (!$this->reflectionProvider->hasClass($referencedClass)) {
+                continue;
+            }
 
-		$fetchedOnType = $scope->getType($node->var);
-		foreach ($fetchedOnType->getObjectClassNames() as $referencedClass) {
-			if (!$this->reflectionProvider->hasClass($referencedClass)) {
-				continue;
-			}
+            $classReflection = $this->reflectionProvider->getClass($referencedClass);
+            if (
+                $this->isUniversalObjectCrate($classReflection)
+                || $this->isSimpleXMLElement($classReflection)
+            ) {
+                return [];
+            }
+        }
 
-			$classReflection = $this->reflectionProvider->getClass($referencedClass);
-			if (
-				$this->isUniversalObjectCrate($classReflection)
-				|| $this->isSimpleXMLElement($classReflection)
-			) {
-				return [];
-			}
-		}
+        return [
+            RuleErrorBuilder::message(sprintf(
+                'Variable property access on %s.',
+                $fetchedOnType->describe(VerbosityLevel::typeOnly()),
+            ))->identifier('property.dynamicName')->build(),
+        ];
+    }
 
-		return [
-			RuleErrorBuilder::message(sprintf(
-				'Variable property access on %s.',
-				$fetchedOnType->describe(VerbosityLevel::typeOnly()),
-			))->identifier('property.dynamicName')->build(),
-		];
-	}
+    private function isSimpleXMLElement(
+        ClassReflection $classReflection
+    ): bool {
+        return $classReflection->is(SimpleXMLElement::class);
+    }
 
-	private function isSimpleXMLElement(
-		ClassReflection $classReflection
-	): bool
-	{
-		return $classReflection->is(SimpleXMLElement::class);
-	}
+    private function isUniversalObjectCrate(
+        ClassReflection $classReflection
+    ): bool {
+        foreach ($this->universalObjectCratesClasses as $className) {
+            if (!$this->reflectionProvider->hasClass($className)) {
+                continue;
+            }
 
-	private function isUniversalObjectCrate(
-		ClassReflection $classReflection
-	): bool
-	{
-		foreach ($this->universalObjectCratesClasses as $className) {
-			if (!$this->reflectionProvider->hasClass($className)) {
-				continue;
-			}
+            if ($classReflection->is($className)) {
+                return true;
+            }
+        }
 
-			if ($classReflection->is($className)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
+        return false;
+    }
 
 }

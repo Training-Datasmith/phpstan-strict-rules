@@ -1,8 +1,10 @@
 <?php
 
-function (stdClass $std) {
-	$std->foo();
+declare(strict_types=1);
 
-	$foo = 'bar';
-	$std->$foo();
+function (stdClass $std) {
+    $std->foo();
+
+    $foo = 'bar';
+    $std->$foo();
 };

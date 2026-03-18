@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\VariableVariables;
 
@@ -10,24 +12,23 @@ use PHPStan\Testing\RuleTestCase;
  */
 class VariableStaticMethodCallableRuleTest extends RuleTestCase
 {
+    protected function getRule(): Rule
+    {
+        return new VariableStaticMethodCallableRule();
+    }
 
-	protected function getRule(): Rule
-	{
-		return new VariableStaticMethodCallableRule();
-	}
-
-	public function testRule(): void
-	{
-		$this->analyse([__DIR__ . '/data/staticMethods-callables.php'], [
-			[
-				'Variable static method call on Foo.',
-				7,
-			],
-			[
-				'Variable static method call on stdClass.',
-				9,
-			],
-		]);
-	}
+    public function testRule(): void
+    {
+        $this->analyse([__DIR__ . '/data/staticMethods-callables.php'], [
+            [
+                'Variable static method call on Foo.',
+                7,
+            ],
+            [
+                'Variable static method call on stdClass.',
+                9,
+            ],
+        ]);
+    }
 
 }

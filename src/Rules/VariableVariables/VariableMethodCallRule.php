@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\VariableVariables;
 
@@ -8,6 +10,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\VerbosityLevel;
+
 use function sprintf;
 
 /**
@@ -15,24 +18,23 @@ use function sprintf;
  */
 class VariableMethodCallRule implements Rule
 {
+    public function getNodeType(): string
+    {
+        return MethodCall::class;
+    }
 
-	public function getNodeType(): string
-	{
-		return MethodCall::class;
-	}
+    public function processNode(Node $node, Scope $scope): array
+    {
+        if ($node->name instanceof Node\Identifier) {
+            return [];
+        }
 
-	public function processNode(Node $node, Scope $scope): array
-	{
-		if ($node->name instanceof Node\Identifier) {
-			return [];
-		}
-
-		return [
-			RuleErrorBuilder::message(sprintf(
-				'Variable method call on %s.',
-				$scope->getType($node->var)->describe(VerbosityLevel::typeOnly()),
-			))->identifier('method.dynamicName')->build(),
-		];
-	}
+        return [
+            RuleErrorBuilder::message(sprintf(
+                'Variable method call on %s.',
+                $scope->getType($node->var)->describe(VerbosityLevel::typeOnly()),
+            ))->identifier('method.dynamicName')->build(),
+        ];
+    }
 
 }

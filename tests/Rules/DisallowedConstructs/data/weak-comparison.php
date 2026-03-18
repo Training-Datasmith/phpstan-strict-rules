@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 $bool1 = 123 == 456;
 $bool2 = 123 === 456;
 $bool3 = 123 != 456;

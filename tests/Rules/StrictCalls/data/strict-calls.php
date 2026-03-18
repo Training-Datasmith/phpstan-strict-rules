@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace StrictCalls;
 
 in_array(1, [1, 2, 3]);

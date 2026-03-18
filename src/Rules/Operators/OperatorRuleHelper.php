@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\Operators;
 
@@ -18,75 +20,74 @@ use PHPStan\Type\UnionType;
 
 class OperatorRuleHelper
 {
+    private RuleLevelHelper $ruleLevelHelper;
 
-	private RuleLevelHelper $ruleLevelHelper;
+    public function __construct(RuleLevelHelper $ruleLevelHelper)
+    {
+        $this->ruleLevelHelper = $ruleLevelHelper;
+    }
 
-	public function __construct(RuleLevelHelper $ruleLevelHelper)
-	{
-		$this->ruleLevelHelper = $ruleLevelHelper;
-	}
+    public function isValidForArithmeticOperation(Scope $scope, Expr $expr): bool
+    {
+        $type = $scope->getType($expr);
+        if ($type instanceof MixedType) {
+            return true;
+        }
 
-	public function isValidForArithmeticOperation(Scope $scope, Expr $expr): bool
-	{
-		$type = $scope->getType($expr);
-		if ($type instanceof MixedType) {
-			return true;
-		}
+        // already reported by PHPStan core
+        if ($type->toNumber() instanceof ErrorType) {
+            return true;
+        }
 
-		// already reported by PHPStan core
-		if ($type->toNumber() instanceof ErrorType) {
-			return true;
-		}
+        return $this->isSubtypeOfNumber($scope, $expr);
+    }
 
-		return $this->isSubtypeOfNumber($scope, $expr);
-	}
+    public function isValidForIncrement(Scope $scope, Expr $expr): bool
+    {
+        $type = $scope->getType($expr);
+        if ($type instanceof MixedType) {
+            return true;
+        }
 
-	public function isValidForIncrement(Scope $scope, Expr $expr): bool
-	{
-		$type = $scope->getType($expr);
-		if ($type instanceof MixedType) {
-			return true;
-		}
+        if ($type->isString()->yes()) {
+            // Because `$a = 'a'; $a++;` is valid
+            return true;
+        }
 
-		if ($type->isString()->yes()) {
-			// Because `$a = 'a'; $a++;` is valid
-			return true;
-		}
+        return $this->isSubtypeOfNumber($scope, $expr);
+    }
 
-		return $this->isSubtypeOfNumber($scope, $expr);
-	}
+    public function isValidForDecrement(Scope $scope, Expr $expr): bool
+    {
+        $type = $scope->getType($expr);
+        if ($type instanceof MixedType) {
+            return true;
+        }
 
-	public function isValidForDecrement(Scope $scope, Expr $expr): bool
-	{
-		$type = $scope->getType($expr);
-		if ($type instanceof MixedType) {
-			return true;
-		}
+        return $this->isSubtypeOfNumber($scope, $expr);
+    }
 
-		return $this->isSubtypeOfNumber($scope, $expr);
-	}
+    private function isSubtypeOfNumber(Scope $scope, Expr $expr): bool
+    {
+        $acceptedType = new UnionType([new IntegerType(), new FloatType(), new IntersectionType([new StringType(), new AccessoryNumericStringType()])]);
 
-	private function isSubtypeOfNumber(Scope $scope, Expr $expr): bool
-	{
-		$acceptedType = new UnionType([new IntegerType(), new FloatType(), new IntersectionType([new StringType(), new AccessoryNumericStringType()])]);
+        $type = $this->ruleLevelHelper->findTypeToCheck(
+            $scope,
+            $expr,
+            '',
+            static fn (Type $type): bool => $acceptedType->isSuperTypeOf($type)->yes(),
+        )->getType();
 
-		$type = $this->ruleLevelHelper->findTypeToCheck(
-			$scope,
-			$expr,
-			'',
-			static fn (Type $type): bool => $acceptedType->isSuperTypeOf($type)->yes(),
-		)->getType();
+        if ($type instanceof ErrorType) {
+            return true;
+        }
 
-		if ($type instanceof ErrorType) {
-			return true;
-		}
+        $isSuperType = $acceptedType->isSuperTypeOf($type);
+        if ($type instanceof BenevolentUnionType) {
+            return !$isSuperType->no();
+        }
 
-		$isSuperType = $acceptedType->isSuperTypeOf($type);
-		if ($type instanceof BenevolentUnionType) {
-			return !$isSuperType->no();
-		}
-
-		return $isSuperType->yes();
-	}
+        return $isSuperType->yes();
+    }
 
 }

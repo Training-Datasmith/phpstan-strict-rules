@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BooleanCondiitons;
 
 $string = 'str';
 $bool = true;
 if (doFoo()) {
-	$bool = false;
+    $bool = false;
 }
 
 /** @var mixed $explicitMixed */
@@ -51,10 +53,18 @@ $explicitMixed or $bool;
 
 $someBool = true;
 $someString = 'string';
-while ($someBool) { $someBool = !$someBool; }
-while ($someString) { $someString = ''; }
+while ($someBool) {
+    $someBool = !$someBool;
+}
+while ($someString) {
+    $someString = '';
+}
 
 $someBool = true;
 $someString = 'string';
-do { $someBool = !$someBool; } while ($someBool);
-do { $someString = ''; } while ($someString);
+do {
+    $someBool = !$someBool;
+} while ($someBool);
+do {
+    $someString = '';
+} while ($someString);

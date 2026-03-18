@@ -1,48 +1,51 @@
-<?php // lint >= 8.1
+<?php
+
+declare(strict_types=1);
+// lint >= 8.1
 
 namespace StrictCallsCallables;
 
 class ClassWithStaticMethod
 {
-	public static function foo()
-	{
+    public static function foo()
+    {
 
-	}
+    }
 
-	public function bar()
-	{
-		$this->foo(...);
-		$this->bar(...);
-	}
+    public function bar()
+    {
+        $this->foo(...);
+        $this->bar(...);
+    }
 }
 
 function () {
-	$classWithStaticMethod = new ClassWithStaticMethod();
-	$classWithStaticMethod->foo(...);
-	$classWithStaticMethod->bar(...);
+    $classWithStaticMethod = new ClassWithStaticMethod();
+    $classWithStaticMethod->foo(...);
+    $classWithStaticMethod->bar(...);
 };
 
 trait TraitWithStaticMethod
 {
-	public static function foo()
-	{
+    public static function foo()
+    {
 
-	}
+    }
 
-	public function bar()
-	{
-		$this->foo(...);
-		$this->bar(...);
-	}
+    public function bar()
+    {
+        $this->foo(...);
+        $this->bar(...);
+    }
 }
 
 class ClassUsingTrait
 {
-	use TraitWithStaticMethod;
+    use TraitWithStaticMethod;
 }
 
 function () {
-	$classUsingTrait = new ClassUsingTrait();
-	$classUsingTrait->foo(...);
-	$classUsingTrait->bar(...);
+    $classUsingTrait = new ClassUsingTrait();
+    $classUsingTrait->foo(...);
+    $classUsingTrait->bar(...);
 };

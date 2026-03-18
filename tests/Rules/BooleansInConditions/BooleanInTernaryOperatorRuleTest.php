@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\BooleansInConditions;
 
@@ -11,24 +13,23 @@ use PHPStan\Testing\RuleTestCase;
  */
 class BooleanInTernaryOperatorRuleTest extends RuleTestCase
 {
+    protected function getRule(): Rule
+    {
+        return new BooleanInTernaryOperatorRule(
+            new BooleanRuleHelper(
+                self::getContainer()->getByType(RuleLevelHelper::class),
+            ),
+        );
+    }
 
-	protected function getRule(): Rule
-	{
-		return new BooleanInTernaryOperatorRule(
-			new BooleanRuleHelper(
-				self::getContainer()->getByType(RuleLevelHelper::class),
-			),
-		);
-	}
-
-	public function testRule(): void
-	{
-		$this->analyse([__DIR__ . '/data/conditions.php'], [
-			[
-				'Only booleans are allowed in a ternary operator condition, string given.',
-				44,
-			],
-		]);
-	}
+    public function testRule(): void
+    {
+        $this->analyse([__DIR__ . '/data/conditions.php'], [
+            [
+                'Only booleans are allowed in a ternary operator condition, string given.',
+                44,
+            ],
+        ]);
+    }
 
 }

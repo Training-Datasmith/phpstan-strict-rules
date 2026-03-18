@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Operators;
 
 use stdClass;
@@ -16,54 +18,53 @@ $mixed = foo();
 $union = bar();
 
 (function () use ($int, $float, $bool, $string, $null, $object, $mixed, $union): void {
-	$int--;
-	$float--;
-	$bool--;
-	$string--;
-	$null--;
-	$object--;
-	$mixed--;
-	$union--;
+    $int--;
+    $float--;
+    $bool--;
+    $string--;
+    $null--;
+    $object--;
+    $mixed--;
+    $union--;
 })();
 
 (function () use ($int, $float, $bool, $string, $null, $object, $mixed, $union): void {
-	$int++;
-	$float++;
-	$bool++;
-	$string++;
-	$null++;
-	$object++;
-	$mixed++;
-	$union++;
+    $int++;
+    $float++;
+    $bool++;
+    $string++;
+    $null++;
+    $object++;
+    $mixed++;
+    $union++;
 })();
 
 (function () use ($int, $float, $bool, $string, $null, $object, $mixed, $union): void {
-	--$int;
-	--$float;
-	--$bool;
-	--$string;
-	--$null;
-	--$object;
-	--$mixed;
-	--$union;
+    --$int;
+    --$float;
+    --$bool;
+    --$string;
+    --$null;
+    --$object;
+    --$mixed;
+    --$union;
 })();
 
 (function () use ($int, $float, $bool, $string, $null, $object, $mixed, $union): void {
-	++$int;
-	++$float;
-	++$bool;
-	++$string;
-	++$null;
-	++$object;
-	++$mixed;
-	++$union;
+    ++$int;
+    ++$float;
+    ++$bool;
+    ++$string;
+    ++$null;
+    ++$object;
+    ++$mixed;
+    ++$union;
 })();
-
 
 function (): void {
-	for ($i = 5; $i < 4; $i++) {
-	}
+    for ($i = 5; $i < 4; $i++) {
+    }
 
-	for ($y = 0; $y < 0; $y++) {
-	}
+    for ($y = 0; $y < 0; $y++) {
+    }
 };

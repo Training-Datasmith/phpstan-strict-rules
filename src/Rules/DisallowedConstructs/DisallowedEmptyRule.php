@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\DisallowedConstructs;
 
@@ -13,19 +15,18 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 class DisallowedEmptyRule implements Rule
 {
+    public function getNodeType(): string
+    {
+        return Empty_::class;
+    }
 
-	public function getNodeType(): string
-	{
-		return Empty_::class;
-	}
-
-	public function processNode(Node $node, Scope $scope): array
-	{
-		return [
-			RuleErrorBuilder::message('Construct empty() is not allowed. Use more strict comparison.')
-				->identifier('empty.notAllowed')
-				->build(),
-		];
-	}
+    public function processNode(Node $node, Scope $scope): array
+    {
+        return [
+            RuleErrorBuilder::message('Construct empty() is not allowed. Use more strict comparison.')
+                ->identifier('empty.notAllowed')
+                ->build(),
+        ];
+    }
 
 }

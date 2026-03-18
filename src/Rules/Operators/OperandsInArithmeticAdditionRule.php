@@ -1,6 +1,10 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\Operators;
+
+use function count;
 
 use PhpParser\Node;
 use PhpParser\Node\Expr;
@@ -10,7 +14,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\VerbosityLevel;
-use function count;
+
 use function sprintf;
 
 /**
@@ -18,52 +22,51 @@ use function sprintf;
  */
 class OperandsInArithmeticAdditionRule implements Rule
 {
+    private OperatorRuleHelper $helper;
 
-	private OperatorRuleHelper $helper;
+    public function __construct(OperatorRuleHelper $helper)
+    {
+        $this->helper = $helper;
+    }
 
-	public function __construct(OperatorRuleHelper $helper)
-	{
-		$this->helper = $helper;
-	}
+    public function getNodeType(): string
+    {
+        return Expr::class;
+    }
 
-	public function getNodeType(): string
-	{
-		return Expr::class;
-	}
+    public function processNode(Node $node, Scope $scope): array
+    {
+        if ($node instanceof BinaryOpPlus) {
+            $left = $node->left;
+            $right = $node->right;
+        } elseif ($node instanceof AssignOpPlus) {
+            $left = $node->var;
+            $right = $node->expr;
+        } else {
+            return [];
+        }
 
-	public function processNode(Node $node, Scope $scope): array
-	{
-		if ($node instanceof BinaryOpPlus) {
-			$left = $node->left;
-			$right = $node->right;
-		} elseif ($node instanceof AssignOpPlus) {
-			$left = $node->var;
-			$right = $node->expr;
-		} else {
-			return [];
-		}
+        $leftType = $scope->getType($left);
+        $rightType = $scope->getType($right);
+        if (count($leftType->getArrays()) > 0 && count($rightType->getArrays()) > 0) {
+            return [];
+        }
 
-		$leftType = $scope->getType($left);
-		$rightType = $scope->getType($right);
-		if (count($leftType->getArrays()) > 0 && count($rightType->getArrays()) > 0) {
-			return [];
-		}
+        $messages = [];
+        if (!$this->helper->isValidForArithmeticOperation($scope, $left)) {
+            $messages[] = RuleErrorBuilder::message(sprintf(
+                'Only numeric types are allowed in +, %s given on the left side.',
+                $leftType->describe(VerbosityLevel::typeOnly()),
+            ))->identifier('plus.leftNonNumeric')->build();
+        }
+        if (!$this->helper->isValidForArithmeticOperation($scope, $right)) {
+            $messages[] = RuleErrorBuilder::message(sprintf(
+                'Only numeric types are allowed in +, %s given on the right side.',
+                $rightType->describe(VerbosityLevel::typeOnly()),
+            ))->identifier('plus.rightNonNumeric')->build();
+        }
 
-		$messages = [];
-		if (!$this->helper->isValidForArithmeticOperation($scope, $left)) {
-			$messages[] = RuleErrorBuilder::message(sprintf(
-				'Only numeric types are allowed in +, %s given on the left side.',
-				$leftType->describe(VerbosityLevel::typeOnly()),
-			))->identifier('plus.leftNonNumeric')->build();
-		}
-		if (!$this->helper->isValidForArithmeticOperation($scope, $right)) {
-			$messages[] = RuleErrorBuilder::message(sprintf(
-				'Only numeric types are allowed in +, %s given on the right side.',
-				$rightType->describe(VerbosityLevel::typeOnly()),
-			))->identifier('plus.rightNonNumeric')->build();
-		}
-
-		return $messages;
-	}
+        return $messages;
+    }
 
 }

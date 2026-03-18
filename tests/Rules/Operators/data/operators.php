@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Operators;
 
 use stdClass;
@@ -95,19 +97,19 @@ $int % $float % $string % $null;
 $array % $float % $array % $int;
 
 function ($mixed, int $a, string $b) {
-	$mixed + $mixed;
-	$mixed + $a;
-	$a + $mixed;
-	$mixed + $b;
-	$b + $mixed;
+    $mixed + $mixed;
+    $mixed + $a;
+    $a + $mixed;
+    $mixed + $b;
+    $b + $mixed;
 };
 
 function (array $array, int $int, $mixed) {
-	foreach ($array as $i => $val) {
-		$i + $int;
-	}
+    foreach ($array as $i => $val) {
+        $i + $int;
+    }
 
-	explode($mixed, $mixed) + $int;
+    explode($mixed, $mixed) + $int;
 };
 
 /** @var numeric-string $numericString */
@@ -115,7 +117,7 @@ $numericString = doFoo();
 $numericString + 1;
 
 function (\ReflectionClass $ref): void {
-	print_r(class_parents($ref->getName()) + class_implements($ref->getName()));
+    print_r(class_parents($ref->getName()) + class_implements($ref->getName()));
 };
 
 $int += $int;
@@ -199,17 +201,17 @@ $int %= $float % $string % $null;
 $array %= $float % $array % $int;
 
 function ($mixed, int $a, string $b) {
-	$mixed += $mixed;
-	$mixed += $a;
-	$a += $mixed;
-	$mixed += $b;
-	$b += $mixed;
+    $mixed += $mixed;
+    $mixed += $a;
+    $a += $mixed;
+    $mixed += $b;
+    $b += $mixed;
 };
 
 function (array $array, int $int, $mixed) {
-	foreach ($array as $i => $val) {
-		$i += $int;
-	}
+    foreach ($array as $i => $val) {
+        $i += $int;
+    }
 };
 
 /** @var numeric-string $numericString */

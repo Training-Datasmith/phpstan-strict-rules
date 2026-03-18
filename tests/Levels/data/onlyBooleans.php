@@ -1,43 +1,43 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Levels\OnlyBooleans;
 
 class Foo
 {
+    /**
+     * @param bool $bool
+     * @param mixed $explicitMixed
+     * @param int|false $intOrFalse
+     * @param float|string $floatOrString
+     */
+    public function doFoo(
+        bool $bool,
+        int $int,
+        $mixed,
+        $explicitMixed,
+        $intOrFalse,
+        $floatOrString
+    ): void {
+        if ($bool) {
 
-	/**
-	 * @param bool $bool
-	 * @param mixed $explicitMixed
-	 * @param int|false $intOrFalse
-	 * @param float|string $floatOrString
-	 */
-	public function doFoo(
-		bool $bool,
-		int $int,
-		$mixed,
-		$explicitMixed,
-		$intOrFalse,
-		$floatOrString
-	): void
-	{
-		if ($bool) {
+        }
+        if ($int) {
 
-		}
-		if ($int) {
+        }
+        if ($mixed) {
 
-		}
-		if ($mixed) {
+        }
+        if ($explicitMixed) {
 
-		}
-		if ($explicitMixed) {
+        }
+        if ($intOrFalse) {
 
-		}
-		if ($intOrFalse) {
+        }
+        if ($floatOrString) {
 
-		}
-		if ($floatOrString) {
-
-		}
-	}
+        }
+    }
 
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\BooleansInConditions;
 
@@ -11,24 +13,23 @@ use PHPStan\Testing\RuleTestCase;
  */
 class BooleanInWhileConditionRuleTest extends RuleTestCase
 {
+    protected function getRule(): Rule
+    {
+        return new BooleanInWhileConditionRule(
+            new BooleanRuleHelper(
+                self::getContainer()->getByType(RuleLevelHelper::class),
+            ),
+        );
+    }
 
-	protected function getRule(): Rule
-	{
-		return new BooleanInWhileConditionRule(
-			new BooleanRuleHelper(
-				self::getContainer()->getByType(RuleLevelHelper::class),
-			),
-		);
-	}
-
-	public function testRule(): void
-	{
-		$this->analyse([__DIR__ . '/data/conditions.php'], [
-			[
-				'Only booleans are allowed in a while condition, string given.',
-				55,
-			],
-		]);
-	}
+    public function testRule(): void
+    {
+        $this->analyse([__DIR__ . '/data/conditions.php'], [
+            [
+                'Only booleans are allowed in a while condition, string given.',
+                55,
+            ],
+        ]);
+    }
 
 }

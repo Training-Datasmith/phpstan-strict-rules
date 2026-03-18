@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\Operators;
 
@@ -9,20 +11,19 @@ use PhpParser\Node\Expr\PostInc;
  */
 class OperandInArithmeticPostIncrementRule extends OperandInArithmeticIncrementOrDecrementRule
 {
+    public function getNodeType(): string
+    {
+        return PostInc::class;
+    }
 
-	public function getNodeType(): string
-	{
-		return PostInc::class;
-	}
+    protected function describeOperation(): string
+    {
+        return 'post-increment';
+    }
 
-	protected function describeOperation(): string
-	{
-		return 'post-increment';
-	}
-
-	protected function getIdentifier(): string
-	{
-		return 'postInc';
-	}
+    protected function getIdentifier(): string
+    {
+        return 'postInc';
+    }
 
 }

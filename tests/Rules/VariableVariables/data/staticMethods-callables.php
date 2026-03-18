@@ -1,10 +1,13 @@
-<?php // lint >= 8.1
+<?php
+
+declare(strict_types=1);
+// lint >= 8.1
 
 function (stdClass $std) {
-	Foo::doFoo(...);
+    Foo::doFoo(...);
 
-	$foo = 'doBar';
-	Foo::$foo(...);
+    $foo = 'doBar';
+    Foo::$foo(...);
 
-	$std::$foo(...);
+    $std::$foo(...);
 };

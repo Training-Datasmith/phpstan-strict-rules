@@ -1,40 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace WrongCase;
 
 interface FooInterface
 {
-
-	public function getFoo();
+    public function getFoo();
 
 }
 
 class FooParent
 {
+    public function getBar()
+    {
 
-	public function getBar()
-	{
-
-	}
+    }
 
 }
 
 class Foo extends FooParent implements FooInterface
 {
+    public function GETfoo()
+    {
 
-	public function GETfoo()
-	{
+    }
 
-	}
+    public function GETbar()
+    {
 
-	public function GETbar()
-	{
+    }
 
-	}
+    public function getBaz()
+    {
 
-	public function getBaz()
-	{
-
-	}
+    }
 
 }

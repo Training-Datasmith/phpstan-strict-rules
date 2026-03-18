@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\Rules\DisallowedConstructs;
 
@@ -13,23 +15,22 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 class DisallowedShortTernaryRule implements Rule
 {
+    public function getNodeType(): string
+    {
+        return Ternary::class;
+    }
 
-	public function getNodeType(): string
-	{
-		return Ternary::class;
-	}
+    public function processNode(Node $node, Scope $scope): array
+    {
+        if ($node->if !== null) {
+            return [];
+        }
 
-	public function processNode(Node $node, Scope $scope): array
-	{
-		if ($node->if !== null) {
-			return [];
-		}
-
-		return [
-			RuleErrorBuilder::message('Short ternary operator is not allowed. Use null coalesce operator if applicable or consider using long ternary.')
-				->identifier('ternary.shortNotAllowed')
-				->build(),
-		];
-	}
+        return [
+            RuleErrorBuilder::message('Short ternary operator is not allowed. Use null coalesce operator if applicable or consider using long ternary.')
+                ->identifier('ternary.shortNotAllowed')
+                ->build(),
+        ];
+    }
 
 }
