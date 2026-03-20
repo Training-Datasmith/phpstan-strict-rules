@@ -1,29 +1,24 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Operators;
 
-namespace PHPStan\Rules\Operators;
-
-use PhpParser\Node\Expr\PreInc;
-
+use Php_Parser\Node\Expr\Pre_Inc;
 /**
  * @phpstan-extends OperandInArithmeticIncrementOrDecrementRule<PreInc>
  */
-class OperandInArithmeticPreIncrementRule extends OperandInArithmeticIncrementOrDecrementRule
+class Operand_In_Arithmetic_Pre_Increment_Rule extends Operand_In_Arithmetic_Increment_Or_Decrement_Rule
 {
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
-        return PreInc::class;
+        return Pre_Inc::class;
     }
-
-    protected function describeOperation(): string
+    protected function describe_operation(): string
     {
         return 'pre-increment';
     }
-
-    protected function getIdentifier(): string
+    protected function get_identifier(): string
     {
         return 'preInc';
     }
-
 }

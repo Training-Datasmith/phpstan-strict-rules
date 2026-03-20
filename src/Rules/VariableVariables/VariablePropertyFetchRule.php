@@ -1,98 +1,72 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Variable_Variables;
 
-namespace PHPStan\Rules\VariableVariables;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr\PropertyFetch;
-use PHPStan\Analyser\Scope;
-use PHPStan\Reflection\ClassReflection;
-use PHPStan\Reflection\ReflectionProvider;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\VerbosityLevel;
-use SimpleXMLElement;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Expr\Property_Fetch;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Reflection\Class_Reflection;
+use Php_Stan\Reflection\Reflection_Provider;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Type\Verbosity_Level;
+use Simple_Xml_Element;
 use function sprintf;
-
 /**
  * @implements Rule<PropertyFetch>
  */
-class VariablePropertyFetchRule implements Rule
+class Variable_Property_Fetch_Rule implements Rule
 {
-    private ReflectionProvider $reflectionProvider;
-
+    private Reflection_Provider $reflection_provider;
     /** @var string[] */
-    private array $universalObjectCratesClasses;
-
+    private array $universal_object_crates_classes;
     /**
      * @param string[] $universalObjectCratesClasses
      */
-    public function __construct(ReflectionProvider $reflectionProvider, array $universalObjectCratesClasses)
+    public function __construct(Reflection_Provider $reflection_provider, array $universal_object_crates_classes)
     {
-        $this->reflectionProvider = $reflectionProvider;
-        $this->universalObjectCratesClasses = $universalObjectCratesClasses;
+        $this->reflection_provider = $reflection_provider;
+        $this->universal_object_crates_classes = $universal_object_crates_classes;
     }
-
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
-        return PropertyFetch::class;
+        return Property_Fetch::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
         if ($node->name instanceof Node\Identifier) {
             return [];
         }
-
-        if ($scope->getType($node->name)->isLiteralString()->yes()) {
+        if ($scope->get_type($node->name)->is_literal_string()->yes()) {
             return [];
         }
-
-        $fetchedOnType = $scope->getType($node->var);
-        foreach ($fetchedOnType->getObjectClassNames() as $referencedClass) {
-            if (!$this->reflectionProvider->hasClass($referencedClass)) {
+        $fetched_on_type = $scope->get_type($node->var);
+        foreach ($fetched_on_type->get_object_class_names() as $referenced_class) {
+            if (!$this->reflection_provider->has_class($referenced_class)) {
                 continue;
             }
-
-            $classReflection = $this->reflectionProvider->getClass($referencedClass);
-            if (
-                $this->isUniversalObjectCrate($classReflection)
-                || $this->isSimpleXMLElement($classReflection)
-            ) {
+            $class_reflection = $this->reflection_provider->get_class($referenced_class);
+            if ($this->is_universal_object_crate($class_reflection) || $this->is_simple_xml_element($class_reflection)) {
                 return [];
             }
         }
-
-        return [
-            RuleErrorBuilder::message(sprintf(
-                'Variable property access on %s.',
-                $fetchedOnType->describe(VerbosityLevel::typeOnly()),
-            ))->identifier('property.dynamicName')->build(),
-        ];
+        return [Rule_Error_Builder::message(sprintf('Variable property access on %s.', $fetched_on_type->describe(Verbosity_Level::type_only())))->identifier('property.dynamicName')->build()];
     }
-
-    private function isSimpleXMLElement(
-        ClassReflection $classReflection
-    ): bool {
-        return $classReflection->is(SimpleXMLElement::class);
+    private function is_simple_xml_element(Class_Reflection $class_reflection): bool
+    {
+        return $class_reflection->is(Simple_Xml_Element::class);
     }
-
-    private function isUniversalObjectCrate(
-        ClassReflection $classReflection
-    ): bool {
-        foreach ($this->universalObjectCratesClasses as $className) {
-            if (!$this->reflectionProvider->hasClass($className)) {
+    private function is_universal_object_crate(Class_Reflection $class_reflection): bool
+    {
+        foreach ($this->universal_object_crates_classes as $class_name) {
+            if (!$this->reflection_provider->has_class($class_name)) {
                 continue;
             }
-
-            if ($classReflection->is($className)) {
+            if ($class_reflection->is($class_name)) {
                 return true;
             }
         }
-
         return false;
     }
-
 }

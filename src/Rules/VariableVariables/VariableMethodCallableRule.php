@@ -1,40 +1,29 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Variable_Variables;
 
-namespace PHPStan\Rules\VariableVariables;
-
-use PhpParser\Node;
-use PHPStan\Analyser\Scope;
-use PHPStan\Node\MethodCallableNode;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\VerbosityLevel;
-
+use Php_Parser\Node;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Node\Method_Callable_Node;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Type\Verbosity_Level;
 use function sprintf;
-
 /**
  * @implements Rule<MethodCallableNode>
  */
-class VariableMethodCallableRule implements Rule
+class Variable_Method_Callable_Rule implements Rule
 {
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
-        return MethodCallableNode::class;
+        return Method_Callable_Node::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
-        if ($node->getName() instanceof Node\Identifier) {
+        if ($node->get_name() instanceof Node\Identifier) {
             return [];
         }
-
-        return [
-            RuleErrorBuilder::message(sprintf(
-                'Variable method call on %s.',
-                $scope->getType($node->getVar())->describe(VerbosityLevel::typeOnly()),
-            ))->identifier('method.dynamicName')->build(),
-        ];
+        return [Rule_Error_Builder::message(sprintf('Variable method call on %s.', $scope->get_type($node->get_var())->describe(Verbosity_Level::type_only())))->identifier('method.dynamicName')->build()];
     }
-
 }

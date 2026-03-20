@@ -1,38 +1,28 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\Rules\VariableVariables;
+declare (strict_types=1);
+namespace Php_Stan\Rules\Variable_Variables;
 
 use function is_string;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr\Variable;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Expr\Variable;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
 /**
  * @implements Rule<Variable>
  */
-class VariableVariablesRule implements Rule
+class Variable_Variables_Rule implements Rule
 {
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
         return Variable::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
         if (is_string($node->name)) {
             return [];
         }
-
-        return [
-            RuleErrorBuilder::message('Variable variables are not allowed.')
-                ->identifier('variable.dynamicName')
-                ->build(),
-        ];
+        return [Rule_Error_Builder::message('Variable variables are not allowed.')->identifier('variable.dynamicName')->build()];
     }
-
 }

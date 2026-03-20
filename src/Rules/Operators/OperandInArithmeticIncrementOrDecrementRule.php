@@ -1,63 +1,44 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Operators;
 
-namespace PHPStan\Rules\Operators;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr\PostDec;
-use PhpParser\Node\Expr\PostInc;
-use PhpParser\Node\Expr\PreDec;
-use PhpParser\Node\Expr\PreInc;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\VerbosityLevel;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Expr\Post_Dec;
+use Php_Parser\Node\Expr\Post_Inc;
+use Php_Parser\Node\Expr\Pre_Dec;
+use Php_Parser\Node\Expr\Pre_Inc;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Type\Verbosity_Level;
 use function sprintf;
-
 /**
  * @phpstan-template TNodeType of PreInc|PreDec|PostInc|PostDec
  * @phpstan-implements Rule<TNodeType>
  */
-abstract class OperandInArithmeticIncrementOrDecrementRule implements Rule
+abstract class Operand_In_Arithmetic_Increment_Or_Decrement_Rule implements Rule
 {
-    private OperatorRuleHelper $helper;
-
-    public function __construct(OperatorRuleHelper $helper)
+    private Operator_Rule_Helper $helper;
+    public function __construct(Operator_Rule_Helper $helper)
     {
         $this->helper = $helper;
     }
-
     /**
      * @param TNodeType $node
      */
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
         $messages = [];
-        $varType = $scope->getType($node->var);
-
-        if (
-            ($node instanceof PreInc || $node instanceof PostInc)
-                && !$this->helper->isValidForIncrement($scope, $node->var)
-            || ($node instanceof PreDec || $node instanceof PostDec)
-                && !$this->helper->isValidForDecrement($scope, $node->var)
-        ) {
-            $messages[] = RuleErrorBuilder::message(sprintf(
-                'Only numeric types are allowed in %s, %s given.',
-                $this->describeOperation(),
-                $varType->describe(VerbosityLevel::typeOnly()),
-            ))->identifier(sprintf('%s.nonNumeric', $this->getIdentifier()))->build();
+        $var_type = $scope->get_type($node->var);
+        if (($node instanceof Pre_Inc || $node instanceof Post_Inc) && !$this->helper->is_valid_for_increment($scope, $node->var) || ($node instanceof Pre_Dec || $node instanceof Post_Dec) && !$this->helper->is_valid_for_decrement($scope, $node->var)) {
+            $messages[] = Rule_Error_Builder::message(sprintf('Only numeric types are allowed in %s, %s given.', $this->describe_operation(), $var_type->describe(Verbosity_Level::type_only())))->identifier(sprintf('%s.nonNumeric', $this->get_identifier()))->build();
         }
-
         return $messages;
     }
-
-    abstract protected function describeOperation(): string;
-
+    abstract protected function describe_operation(): string;
     /**
      * @return 'preInc'|'postInc'|'preDec'|'postDec'
      */
-    abstract protected function getIdentifier(): string;
-
+    abstract protected function get_identifier(): string;
 }

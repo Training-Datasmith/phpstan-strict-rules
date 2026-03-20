@@ -1,53 +1,39 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Booleans_In_Conditions;
 
-namespace PHPStan\Rules\BooleansInConditions;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr\Ternary;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\VerbosityLevel;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Expr\Ternary;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Type\Verbosity_Level;
 use function sprintf;
-
 /**
  * @implements Rule<Ternary>
  */
-class BooleanInTernaryOperatorRule implements Rule
+class Boolean_In_Ternary_Operator_Rule implements Rule
 {
-    private BooleanRuleHelper $helper;
-
-    public function __construct(BooleanRuleHelper $helper)
+    private Boolean_Rule_Helper $helper;
+    public function __construct(Boolean_Rule_Helper $helper)
     {
         $this->helper = $helper;
     }
-
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
         return Ternary::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
         if ($node->if === null) {
-            return []; // elvis ?:
+            return [];
+            // elvis ?:
         }
-
-        if ($this->helper->passesAsBoolean($scope, $node->cond)) {
+        if ($this->helper->passes_as_boolean($scope, $node->cond)) {
             return [];
         }
-
-        $conditionExpressionType = $scope->getType($node->cond);
-
-        return [
-            RuleErrorBuilder::message(sprintf(
-                'Only booleans are allowed in a ternary operator condition, %s given.',
-                $conditionExpressionType->describe(VerbosityLevel::typeOnly()),
-            ))->identifier('ternary.condNotBoolean')->build(),
-        ];
+        $condition_expression_type = $scope->get_type($node->cond);
+        return [Rule_Error_Builder::message(sprintf('Only booleans are allowed in a ternary operator condition, %s given.', $condition_expression_type->describe(Verbosity_Level::type_only())))->identifier('ternary.condNotBoolean')->build()];
     }
-
 }

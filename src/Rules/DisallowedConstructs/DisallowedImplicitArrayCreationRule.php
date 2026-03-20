@@ -1,68 +1,48 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\Rules\DisallowedConstructs;
+declare (strict_types=1);
+namespace Php_Stan\Rules\Disallowed_Constructs;
 
 use function is_string;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr\ArrayDimFetch;
-use PhpParser\Node\Expr\Assign;
-use PhpParser\Node\Expr\Variable;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Expr\Array_Dim_Fetch;
+use Php_Parser\Node\Expr\Assign;
+use Php_Parser\Node\Expr\Variable;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
 use function sprintf;
-
 /**
  * @implements Rule<Assign>
  */
-class DisallowedImplicitArrayCreationRule implements Rule
+class Disallowed_Implicit_Array_Creation_Rule implements Rule
 {
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
         return Assign::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
-        if (!$node->var instanceof ArrayDimFetch) {
+        if (!$node->var instanceof Array_Dim_Fetch) {
             return [];
         }
-
         $node = $node->var;
-        while ($node instanceof ArrayDimFetch) {
+        while ($node instanceof Array_Dim_Fetch) {
             $node = $node->var;
         }
-
         if (!$node instanceof Variable) {
             return [];
         }
-
         if (!is_string($node->name)) {
             return [];
         }
-
-        $certainty = $scope->hasVariableType($node->name);
+        $certainty = $scope->has_variable_type($node->name);
         if ($certainty->no()) {
-            return [
-                RuleErrorBuilder::message(sprintf('Implicit array creation is not allowed - variable $%s does not exist.', $node->name))
-                    ->identifier('variable.implicitArray')
-                    ->build(),
-            ];
+            return [Rule_Error_Builder::message(sprintf('Implicit array creation is not allowed - variable $%s does not exist.', $node->name))->identifier('variable.implicitArray')->build()];
         }
-
         if ($certainty->maybe()) {
-            return [
-                RuleErrorBuilder::message(sprintf('Implicit array creation is not allowed - variable $%s might not exist.', $node->name))
-                    ->identifier('variable.implicitArray')
-                    ->build(),
-            ];
+            return [Rule_Error_Builder::message(sprintf('Implicit array creation is not allowed - variable $%s might not exist.', $node->name))->identifier('variable.implicitArray')->build()];
         }
-
         return [];
     }
-
 }

@@ -1,82 +1,61 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Cast;
 
-namespace PHPStan\Rules\Cast;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr\Cast;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\ErrorType;
-use PHPStan\Type\GeneralizePrecision;
-use PHPStan\Type\VerbosityLevel;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Expr\Cast;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Type\Error_Type;
+use Php_Stan\Type\Generalize_Precision;
+use Php_Stan\Type\Verbosity_Level;
 use function sprintf;
-
 /**
  * @implements Rule<Cast>
  */
-class UselessCastRule implements Rule
+class Useless_Cast_Rule implements Rule
 {
-    private bool $treatPhpDocTypesAsCertain;
-
-    private bool $treatPhpDocTypesAsCertainTip;
-
-    public function __construct(
-        bool $treatPhpDocTypesAsCertain,
-        bool $treatPhpDocTypesAsCertainTip
-    ) {
-        $this->treatPhpDocTypesAsCertain = $treatPhpDocTypesAsCertain;
-        $this->treatPhpDocTypesAsCertainTip = $treatPhpDocTypesAsCertainTip;
+    private bool $treat_php_doc_types_as_certain;
+    private bool $treat_php_doc_types_as_certain_tip;
+    public function __construct(bool $treat_php_doc_types_as_certain, bool $treat_php_doc_types_as_certain_tip)
+    {
+        $this->treat_php_doc_types_as_certain = $treat_php_doc_types_as_certain;
+        $this->treat_php_doc_types_as_certain_tip = $treat_php_doc_types_as_certain_tip;
     }
-
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
         return Cast::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
-        $castType = $scope->getType($node);
-        if ($castType instanceof ErrorType) {
+        $cast_type = $scope->get_type($node);
+        if ($cast_type instanceof Error_Type) {
             return [];
         }
-        $castType = $castType->generalize(GeneralizePrecision::lessSpecific());
-
-        if ($this->treatPhpDocTypesAsCertain) {
-            $expressionType = $scope->getType($node->expr);
+        $cast_type = $cast_type->generalize(Generalize_Precision::less_specific());
+        if ($this->treat_php_doc_types_as_certain) {
+            $expression_type = $scope->get_type($node->expr);
         } else {
-            $expressionType = $scope->getNativeType($node->expr);
+            $expression_type = $scope->get_native_type($node->expr);
         }
-        if ($castType->isSuperTypeOf($expressionType)->yes()) {
-            $addTip = function (RuleErrorBuilder $ruleErrorBuilder) use ($scope, $node, $castType): RuleErrorBuilder {
-                if (!$this->treatPhpDocTypesAsCertain) {
-                    return $ruleErrorBuilder;
+        if ($cast_type->is_super_type_of($expression_type)->yes()) {
+            $add_tip = function (Rule_Error_Builder $rule_error_builder) use ($scope, $node, $cast_type): Rule_Error_Builder {
+                if (!$this->treat_php_doc_types_as_certain) {
+                    return $rule_error_builder;
                 }
-
-                if (!$this->treatPhpDocTypesAsCertainTip) {
-                    return $ruleErrorBuilder;
+                if (!$this->treat_php_doc_types_as_certain_tip) {
+                    return $rule_error_builder;
                 }
-
-                $expressionTypeWithoutPhpDoc = $scope->getNativeType($node->expr);
-                if ($castType->isSuperTypeOf($expressionTypeWithoutPhpDoc)->yes()) {
-                    return $ruleErrorBuilder;
+                $expression_type_without_php_doc = $scope->get_native_type($node->expr);
+                if ($cast_type->is_super_type_of($expression_type_without_php_doc)->yes()) {
+                    return $rule_error_builder;
                 }
-
-                return $ruleErrorBuilder->treatPhpDocTypesAsCertainTip();
+                return $rule_error_builder->treat_php_doc_types_as_certain_tip();
             };
-            return [
-                $addTip(RuleErrorBuilder::message(sprintf(
-                    'Casting to %s something that\'s already %s.',
-                    $castType->describe(VerbosityLevel::typeOnly()),
-                    $expressionType->describe(VerbosityLevel::typeOnly()),
-                )))->identifier('cast.useless')->build(),
-            ];
+            return [$add_tip(Rule_Error_Builder::message(sprintf('Casting to %s something that\'s already %s.', $cast_type->describe(Verbosity_Level::type_only()), $expression_type->describe(Verbosity_Level::type_only()))))->identifier('cast.useless')->build()];
         }
-
         return [];
     }
-
 }

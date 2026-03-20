@@ -1,62 +1,44 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Switch_Conditions;
 
-namespace PHPStan\Rules\SwitchConditions;
-
-use PhpParser\Node;
-use PhpParser\Node\Stmt\Switch_;
-use PHPStan\Analyser\Scope;
-use PHPStan\Node\Printer\Printer;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\VerbosityLevel;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Stmt\Switch_;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Node\Printer\Printer;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Type\Verbosity_Level;
 use function sprintf;
-
 /**
  * @implements Rule<Switch_>
  */
-class MatchingTypeInSwitchCaseConditionRule implements Rule
+class Matching_Type_In_Switch_Case_Condition_Rule implements Rule
 {
     private Printer $printer;
-
     public function __construct(Printer $printer)
     {
         $this->printer = $printer;
     }
-
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
         return Switch_::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
         $messages = [];
-        $conditionType = $scope->getType($node->cond);
+        $condition_type = $scope->get_type($node->cond);
         foreach ($node->cases as $case) {
             if ($case->cond === null) {
                 continue;
             }
-
-            $caseType = $scope->getType($case->cond);
-            if (!$conditionType->isSuperTypeOf($caseType)->no()) {
+            $case_type = $scope->get_type($case->cond);
+            if (!$condition_type->is_super_type_of($case_type)->no()) {
                 continue;
             }
-
-            $messages[] = RuleErrorBuilder::message(sprintf(
-                'Switch condition type (%s) does not match case condition %s (%s).',
-                $conditionType->describe(VerbosityLevel::value()),
-                $this->printer->prettyPrintExpr($case->cond),
-                $caseType->describe(VerbosityLevel::typeOnly()),
-            ))
-                ->line($case->getStartLine())
-                ->identifier('switch.type')
-                ->build();
+            $messages[] = Rule_Error_Builder::message(sprintf('Switch condition type (%s) does not match case condition %s (%s).', $condition_type->describe(Verbosity_Level::value()), $this->printer->pretty_print_expr($case->cond), $case_type->describe(Verbosity_Level::type_only())))->line($case->get_start_line())->identifier('switch.type')->build();
         }
-
         return $messages;
     }
-
 }

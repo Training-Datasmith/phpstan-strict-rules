@@ -1,99 +1,67 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\Rules\StrictCalls;
+declare (strict_types=1);
+namespace Php_Stan\Rules\Strict_Calls;
 
 use function array_key_exists;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr\FuncCall;
-use PhpParser\Node\Name;
-use PHPStan\Analyser\ArgumentsNormalizer;
-use PHPStan\Analyser\Scope;
-use PHPStan\Reflection\ParametersAcceptorSelector;
-use PHPStan\Reflection\ReflectionProvider;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\Constant\ConstantBooleanType;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Expr\Func_Call;
+use Php_Parser\Node\Name;
+use Php_Stan\Analyser\Arguments_Normalizer;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Reflection\Parameters_Acceptor_Selector;
+use Php_Stan\Reflection\Reflection_Provider;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Type\Constant\Constant_Boolean_Type;
 use function sprintf;
 use function strtolower;
-
 /**
  * @implements Rule<FuncCall>
  */
-class StrictFunctionCallsRule implements Rule
+class Strict_Function_Calls_Rule implements Rule
 {
     /** @var int[] */
-    private array $functionArguments = [
-        'in_array' => 2,
-        'array_search' => 2,
-        'base64_decode' => 1,
-        'array_keys' => 2,
-    ];
-
-    private ReflectionProvider $reflectionProvider;
-
-    public function __construct(ReflectionProvider $reflectionProvider)
+    private array $function_arguments = ['in_array' => 2, 'array_search' => 2, 'base64_decode' => 1, 'array_keys' => 2];
+    private Reflection_Provider $reflection_provider;
+    public function __construct(Reflection_Provider $reflection_provider)
     {
-        $this->reflectionProvider = $reflectionProvider;
+        $this->reflection_provider = $reflection_provider;
     }
-
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
-        return FuncCall::class;
+        return Func_Call::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
         if (!$node->name instanceof Name) {
             return [];
         }
-
-        if (!$this->reflectionProvider->hasFunction($node->name, $scope)) {
+        if (!$this->reflection_provider->has_function($node->name, $scope)) {
             return [];
         }
-
-        $function = $this->reflectionProvider->getFunction($node->name, $scope);
-        $parametersAcceptor = ParametersAcceptorSelector::selectFromArgs($scope, $node->getArgs(), $function->getVariants());
-        $node = ArgumentsNormalizer::reorderFuncArguments($parametersAcceptor, $node);
+        $function = $this->reflection_provider->get_function($node->name, $scope);
+        $parameters_acceptor = Parameters_Acceptor_Selector::select_from_args($scope, $node->get_args(), $function->get_variants());
+        $node = Arguments_Normalizer::reorder_func_arguments($parameters_acceptor, $node);
         if ($node === null) {
             return [];
         }
-        $functionName = strtolower($function->getName());
-        if (!array_key_exists($functionName, $this->functionArguments)) {
+        $function_name = strtolower($function->get_name());
+        if (!array_key_exists($function_name, $this->function_arguments)) {
             return [];
         }
-
-        if ($functionName === 'array_keys' && !array_key_exists(1, $node->getArgs())) {
+        if ($function_name === 'array_keys' && !array_key_exists(1, $node->get_args())) {
             return [];
         }
-
-        $argumentPosition = $this->functionArguments[$functionName];
-        if (!array_key_exists($argumentPosition, $node->getArgs())) {
-            return [
-                RuleErrorBuilder::message(sprintf(
-                    'Call to function %s() requires parameter #%d to be set.',
-                    $functionName,
-                    $argumentPosition + 1,
-                ))->identifier('function.strict')->build(),
-            ];
+        $argument_position = $this->function_arguments[$function_name];
+        if (!array_key_exists($argument_position, $node->get_args())) {
+            return [Rule_Error_Builder::message(sprintf('Call to function %s() requires parameter #%d to be set.', $function_name, $argument_position + 1))->identifier('function.strict')->build()];
         }
-
-        $argumentType = $scope->getType($node->getArgs()[$argumentPosition]->value);
-        $trueType = new ConstantBooleanType(true);
-        if (!$trueType->isSuperTypeOf($argumentType)->yes()) {
-            return [
-                RuleErrorBuilder::message(sprintf(
-                    'Call to function %s() requires parameter #%d to be true.',
-                    $functionName,
-                    $argumentPosition + 1,
-                ))->identifier('function.strict')->build(),
-            ];
+        $argument_type = $scope->get_type($node->get_args()[$argument_position]->value);
+        $true_type = new Constant_Boolean_Type(true);
+        if (!$true_type->is_super_type_of($argument_type)->yes()) {
+            return [Rule_Error_Builder::message(sprintf('Call to function %s() requires parameter #%d to be true.', $function_name, $argument_position + 1))->identifier('function.strict')->build()];
         }
-
         return [];
     }
-
 }

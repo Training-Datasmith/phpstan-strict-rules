@@ -1,36 +1,27 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Disallowed_Constructs;
 
-namespace PHPStan\Rules\DisallowedConstructs;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr\Ternary;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Expr\Ternary;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
 /**
  * @implements Rule<Ternary>
  */
-class DisallowedShortTernaryRule implements Rule
+class Disallowed_Short_Ternary_Rule implements Rule
 {
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
         return Ternary::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
         if ($node->if !== null) {
             return [];
         }
-
-        return [
-            RuleErrorBuilder::message('Short ternary operator is not allowed. Use null coalesce operator if applicable or consider using long ternary.')
-                ->identifier('ternary.shortNotAllowed')
-                ->build(),
-        ];
+        return [Rule_Error_Builder::message('Short ternary operator is not allowed. Use null coalesce operator if applicable or consider using long ternary.')->identifier('ternary.shortNotAllowed')->build()];
     }
-
 }

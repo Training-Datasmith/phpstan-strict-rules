@@ -1,86 +1,54 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Methods;
 
-namespace PHPStan\Rules\Methods;
-
-use PhpParser\Node;
-use PHPStan\Analyser\Scope;
-use PHPStan\Node\InClassMethodNode;
-use PHPStan\Reflection\ClassReflection;
-use PHPStan\Rules\IdentifierRuleError;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-
+use Php_Parser\Node;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Node\In_Class_Method_Node;
+use Php_Stan\Reflection\Class_Reflection;
+use Php_Stan\Rules\Identifier_Rule_Error;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
 use function sprintf;
-
 /**
  * @implements Rule<InClassMethodNode>
  */
-class WrongCaseOfInheritedMethodRule implements Rule
+class Wrong_Case_Of_Inherited_Method_Rule implements Rule
 {
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
-        return InClassMethodNode::class;
+        return In_Class_Method_Node::class;
     }
-
-    public function processNode(
-        Node $node,
-        Scope $scope
-    ): array {
-        $methodReflection = $node->getMethodReflection();
-        $declaringClass = $methodReflection->getDeclaringClass();
-
+    public function process_node(Node $node, Scope $scope): array
+    {
+        $method_reflection = $node->get_method_reflection();
+        $declaring_class = $method_reflection->get_declaring_class();
         $messages = [];
-        if ($declaringClass->getParentClass() !== null) {
-            $parentMessage = $this->findMethod(
-                $declaringClass,
-                $declaringClass->getParentClass(),
-                $methodReflection->getName(),
-            );
-            if ($parentMessage !== null) {
-                $messages[] = $parentMessage;
+        if ($declaring_class->get_parent_class() !== null) {
+            $parent_message = $this->find_method($declaring_class, $declaring_class->get_parent_class(), $method_reflection->get_name());
+            if ($parent_message !== null) {
+                $messages[] = $parent_message;
             }
         }
-
-        foreach ($declaringClass->getInterfaces() as $interface) {
-            $interfaceMessage = $this->findMethod(
-                $declaringClass,
-                $interface,
-                $methodReflection->getName(),
-            );
-            if ($interfaceMessage === null) {
+        foreach ($declaring_class->get_interfaces() as $interface) {
+            $interface_message = $this->find_method($declaring_class, $interface, $method_reflection->get_name());
+            if ($interface_message === null) {
                 continue;
             }
-
-            $messages[] = $interfaceMessage;
+            $messages[] = $interface_message;
         }
-
         return $messages;
     }
-
-    private function findMethod(
-        ClassReflection $declaringClass,
-        ClassReflection $classReflection,
-        string $methodName
-    ): ?IdentifierRuleError {
-        if (!$classReflection->hasNativeMethod($methodName)) {
+    private function find_method(Class_Reflection $declaring_class, Class_Reflection $class_reflection, string $method_name): ?Identifier_Rule_Error
+    {
+        if (!$class_reflection->has_native_method($method_name)) {
             return null;
         }
-
-        $parentMethod = $classReflection->getNativeMethod($methodName);
-        if ($parentMethod->getName() === $methodName) {
+        $parent_method = $class_reflection->get_native_method($method_name);
+        if ($parent_method->get_name() === $method_name) {
             return null;
         }
-
-        return RuleErrorBuilder::message(sprintf(
-            'Method %s::%s() does not match %s method name: %s::%s().',
-            $declaringClass->getDisplayName(),
-            $methodName,
-            $classReflection->isInterface() ? 'interface' : 'parent',
-            $classReflection->getDisplayName(),
-            $parentMethod->getName(),
-        ))->identifier('method.nameCase')->build();
+        return Rule_Error_Builder::message(sprintf('Method %s::%s() does not match %s method name: %s::%s().', $declaring_class->get_display_name(), $method_name, $class_reflection->is_interface() ? 'interface' : 'parent', $class_reflection->get_display_name(), $parent_method->get_name()))->identifier('method.nameCase')->build();
     }
-
 }

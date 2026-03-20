@@ -1,43 +1,32 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Booleans_In_Conditions;
 
-namespace PHPStan\Rules\BooleansInConditions;
-
-use PhpParser\Node\Expr;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\RuleLevelHelper;
-use PHPStan\Type\ErrorType;
-use PHPStan\Type\MixedType;
-use PHPStan\Type\Type;
-
-class BooleanRuleHelper
+use Php_Parser\Node\Expr;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule_Level_Helper;
+use Php_Stan\Type\Error_Type;
+use Php_Stan\Type\Mixed_Type;
+use Php_Stan\Type\Type;
+class Boolean_Rule_Helper
 {
-    private RuleLevelHelper $ruleLevelHelper;
-
-    public function __construct(RuleLevelHelper $ruleLevelHelper)
+    private Rule_Level_Helper $rule_level_helper;
+    public function __construct(Rule_Level_Helper $rule_level_helper)
     {
-        $this->ruleLevelHelper = $ruleLevelHelper;
+        $this->rule_level_helper = $rule_level_helper;
     }
-
-    public function passesAsBoolean(Scope $scope, Expr $expr): bool
+    public function passes_as_boolean(Scope $scope, Expr $expr): bool
     {
-        $type = $scope->getType($expr);
-        if ($type instanceof MixedType) {
-            return !$type->isExplicitMixed();
+        $type = $scope->get_type($expr);
+        if ($type instanceof Mixed_Type) {
+            return !$type->is_explicit_mixed();
         }
-        $typeToCheck = $this->ruleLevelHelper->findTypeToCheck(
-            $scope,
-            $expr,
-            '',
-            static fn (Type $type): bool => $type->isBoolean()->yes(),
-        );
-        $foundType = $typeToCheck->getType();
-        if ($foundType instanceof ErrorType) {
+        $type_to_check = $this->rule_level_helper->find_type_to_check($scope, $expr, '', static fn(Type $type): bool => $type->is_boolean()->yes());
+        $found_type = $type_to_check->get_type();
+        if ($found_type instanceof Error_Type) {
             return true;
         }
-
-        return $foundType->isBoolean()->yes();
+        return $found_type->is_boolean()->yes();
     }
-
 }

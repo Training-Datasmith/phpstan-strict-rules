@@ -1,95 +1,72 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\Rules\Methods;
+declare (strict_types=1);
+namespace Php_Stan\Rules\Methods;
 
 use function array_key_exists;
 use function array_map;
 use function in_array;
-
-use PhpParser\Node;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-
+use Php_Parser\Node;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
 use function sprintf;
 use function strtolower;
-
 /**
  * @implements Rule<Node\Expr\StaticCall>
  */
-final class IllegalConstructorStaticCallRule implements Rule
+final class Illegal_Constructor_Static_Call_Rule implements Rule
 {
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
-        return Node\Expr\StaticCall::class;
+        return Node\Expr\Static_Call::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
-        if (!$node->name instanceof Node\Identifier || $node->name->toLowerString() !== '__construct') {
+        if (!$node->name instanceof Node\Identifier || $node->name->to_lower_string() !== '__construct') {
             return [];
         }
-
-        if ($this->isCollectCallingConstructor($node, $scope)) {
+        if ($this->is_collect_calling_constructor($node, $scope)) {
             return [];
         }
-
-        return [
-            RuleErrorBuilder::message('Static call to __construct() is only allowed on a parent class in the constructor.')
-                ->identifier('constructor.call')
-                ->build(),
-        ];
+        return [Rule_Error_Builder::message('Static call to __construct() is only allowed on a parent class in the constructor.')->identifier('constructor.call')->build()];
     }
-
-    private function isCollectCallingConstructor(Node\Expr\StaticCall $node, Scope $scope): bool
+    private function is_collect_calling_constructor(Node\Expr\Static_Call $node, Scope $scope): bool
     {
         // __construct should be called from inside constructor
-        if ($scope->getFunction() === null) {
+        if ($scope->get_function() === null) {
             return false;
         }
-
-        if ($scope->getFunction()->getName() !== '__construct') {
-            if (!$this->isInRenamedTraitConstructor($scope)) {
+        if ($scope->get_function()->get_name() !== '__construct') {
+            if (!$this->is_in_renamed_trait_constructor($scope)) {
                 return false;
             }
         }
-
-        if (!$scope->isInClass()) {
+        if (!$scope->is_in_class()) {
             return false;
         }
-
         if (!$node->class instanceof Node\Name) {
             return false;
         }
-
-        $parentClasses = array_map(static fn (string $name): string => strtolower($name), $scope->getClassReflection()->getParentClassesNames());
-
-        return in_array(strtolower($scope->resolveName($node->class)), $parentClasses, true);
+        $parent_classes = array_map(static fn(string $name): string => strtolower($name), $scope->get_class_reflection()->get_parent_classes_names());
+        return in_array(strtolower($scope->resolve_name($node->class)), $parent_classes, true);
     }
-
-    private function isInRenamedTraitConstructor(Scope $scope): bool
+    private function is_in_renamed_trait_constructor(Scope $scope): bool
     {
-        if (!$scope->isInClass()) {
+        if (!$scope->is_in_class()) {
             return false;
         }
-
-        if (!$scope->isInTrait()) {
+        if (!$scope->is_in_trait()) {
             return false;
         }
-
-        if ($scope->getFunction() === null) {
+        if ($scope->get_function() === null) {
             return false;
         }
-
-        $traitAliases = $scope->getClassReflection()->getNativeReflection()->getTraitAliases();
-        $functionName = $scope->getFunction()->getName();
-        if (!array_key_exists($functionName, $traitAliases)) {
+        $trait_aliases = $scope->get_class_reflection()->get_native_reflection()->get_trait_aliases();
+        $function_name = $scope->get_function()->get_name();
+        if (!array_key_exists($function_name, $trait_aliases)) {
             return false;
         }
-
-        return $traitAliases[$functionName] === sprintf('%s::%s', $scope->getTraitReflection()->getName(), '__construct');
+        return $trait_aliases[$function_name] === sprintf('%s::%s', $scope->get_trait_reflection()->get_name(), '__construct');
     }
-
 }

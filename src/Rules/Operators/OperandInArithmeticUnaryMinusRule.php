@@ -1,49 +1,36 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Operators;
 
-namespace PHPStan\Rules\Operators;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr\UnaryMinus;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\VerbosityLevel;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Expr\Unary_Minus;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Type\Verbosity_Level;
 use function sprintf;
-
 /**
  * @phpstan-implements Rule<UnaryMinus>
  */
-class OperandInArithmeticUnaryMinusRule implements Rule
+class Operand_In_Arithmetic_Unary_Minus_Rule implements Rule
 {
-    private OperatorRuleHelper $helper;
-
-    public function __construct(OperatorRuleHelper $helper)
+    private Operator_Rule_Helper $helper;
+    public function __construct(Operator_Rule_Helper $helper)
     {
         $this->helper = $helper;
     }
-
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
-        return UnaryMinus::class;
+        return Unary_Minus::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
         $messages = [];
-
-        if (!$this->helper->isValidForArithmeticOperation($scope, $node->expr)) {
-            $varType = $scope->getType($node->expr);
-
-            $messages[] = RuleErrorBuilder::message(sprintf(
-                'Only numeric types are allowed in unary -, %s given.',
-                $varType->describe(VerbosityLevel::typeOnly()),
-            ))->identifier('unaryMinus.nonNumeric')->build();
+        if (!$this->helper->is_valid_for_arithmetic_operation($scope, $node->expr)) {
+            $var_type = $scope->get_type($node->expr);
+            $messages[] = Rule_Error_Builder::message(sprintf('Only numeric types are allowed in unary -, %s given.', $var_type->describe(Verbosity_Level::type_only())))->identifier('unaryMinus.nonNumeric')->build();
         }
-
         return $messages;
     }
-
 }

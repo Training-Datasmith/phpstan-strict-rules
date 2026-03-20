@@ -1,49 +1,35 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Booleans_In_Conditions;
 
-namespace PHPStan\Rules\BooleansInConditions;
-
-use PhpParser\Node;
-use PhpParser\Node\Stmt\ElseIf_;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\VerbosityLevel;
-
+use Php_Parser\Node;
+use Php_Parser\Node\Stmt\Else_If_;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Type\Verbosity_Level;
 use function sprintf;
-
 /**
  * @implements Rule<ElseIf_>
  */
-class BooleanInElseIfConditionRule implements Rule
+class Boolean_In_Else_If_Condition_Rule implements Rule
 {
-    private BooleanRuleHelper $helper;
-
-    public function __construct(BooleanRuleHelper $helper)
+    private Boolean_Rule_Helper $helper;
+    public function __construct(Boolean_Rule_Helper $helper)
     {
         $this->helper = $helper;
     }
-
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
-        return ElseIf_::class;
+        return Else_If_::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
-        if ($this->helper->passesAsBoolean($scope, $node->cond)) {
+        if ($this->helper->passes_as_boolean($scope, $node->cond)) {
             return [];
         }
-
-        $conditionExpressionType = $scope->getType($node->cond);
-
-        return [
-            RuleErrorBuilder::message(sprintf(
-                'Only booleans are allowed in an elseif condition, %s given.',
-                $conditionExpressionType->describe(VerbosityLevel::typeOnly()),
-            ))->identifier('elseif.condNotBoolean')->build(),
-        ];
+        $condition_expression_type = $scope->get_type($node->cond);
+        return [Rule_Error_Builder::message(sprintf('Only booleans are allowed in an elseif condition, %s given.', $condition_expression_type->describe(Verbosity_Level::type_only())))->identifier('elseif.condNotBoolean')->build()];
     }
-
 }

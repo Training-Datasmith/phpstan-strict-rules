@@ -1,67 +1,45 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Rules\Strict_Calls;
 
-namespace PHPStan\Rules\StrictCalls;
-
-use PhpParser\Node;
-use PHPStan\Analyser\Scope;
-use PHPStan\Node\MethodCallableNode;
-use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Rules\RuleLevelHelper;
-use PHPStan\Type\ErrorType;
-use PHPStan\Type\Type;
-
+use Php_Parser\Node;
+use Php_Stan\Analyser\Scope;
+use Php_Stan\Node\Method_Callable_Node;
+use Php_Stan\Rules\Rule;
+use Php_Stan\Rules\Rule_Error_Builder;
+use Php_Stan\Rules\Rule_Level_Helper;
+use Php_Stan\Type\Error_Type;
+use Php_Stan\Type\Type;
 use function sprintf;
-
 /**
  * @implements Rule<MethodCallableNode>
  */
-class DynamicCallOnStaticMethodsCallableRule implements Rule
+class Dynamic_Call_On_Static_Methods_Callable_Rule implements Rule
 {
-    private RuleLevelHelper $ruleLevelHelper;
-
-    public function __construct(RuleLevelHelper $ruleLevelHelper)
+    private Rule_Level_Helper $rule_level_helper;
+    public function __construct(Rule_Level_Helper $rule_level_helper)
     {
-        $this->ruleLevelHelper = $ruleLevelHelper;
+        $this->rule_level_helper = $rule_level_helper;
     }
-
-    public function getNodeType(): string
+    public function get_node_type(): string
     {
-        return MethodCallableNode::class;
+        return Method_Callable_Node::class;
     }
-
-    public function processNode(Node $node, Scope $scope): array
+    public function process_node(Node $node, Scope $scope): array
     {
-        if (!$node->getName() instanceof Node\Identifier) {
+        if (!$node->get_name() instanceof Node\Identifier) {
             return [];
         }
-
-        $name = $node->getName()->name;
-        $type = $this->ruleLevelHelper->findTypeToCheck(
-            $scope,
-            $node->getVar(),
-            '',
-            static fn (Type $type): bool => $type->canCallMethods()->yes() && $type->hasMethod($name)->yes(),
-        )->getType();
-
-        if ($type instanceof ErrorType || !$type->canCallMethods()->yes() || !$type->hasMethod($name)->yes()) {
+        $name = $node->get_name()->name;
+        $type = $this->rule_level_helper->find_type_to_check($scope, $node->get_var(), '', static fn(Type $type): bool => $type->can_call_methods()->yes() && $type->has_method($name)->yes())->get_type();
+        if ($type instanceof Error_Type || !$type->can_call_methods()->yes() || !$type->has_method($name)->yes()) {
             return [];
         }
-
-        $methodReflection = $type->getMethod($name, $scope);
-        if ($methodReflection->isStatic()) {
-            return [
-                RuleErrorBuilder::message(sprintf(
-                    'Dynamic call to static method %s::%s().',
-                    $methodReflection->getDeclaringClass()->getDisplayName(),
-                    $methodReflection->getName(),
-                ))->identifier('staticMethod.dynamicCall')->build(),
-            ];
+        $method_reflection = $type->get_method($name, $scope);
+        if ($method_reflection->is_static()) {
+            return [Rule_Error_Builder::message(sprintf('Dynamic call to static method %s::%s().', $method_reflection->get_declaring_class()->get_display_name(), $method_reflection->get_name()))->identifier('staticMethod.dynamicCall')->build()];
         }
-
         return [];
     }
-
 }
